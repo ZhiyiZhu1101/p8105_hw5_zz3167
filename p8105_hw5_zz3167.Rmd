@@ -5,4 +5,57 @@ date: "2023-11-08"
 output: github_document
 ---
 
+```{r setup, message = FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(
+  fig.width = 15,
+  fig.asp = .6,
+  dpi = 200,
+  out.width = "90%",
+  message = FALSE, 
+  warning = FALSE
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+```
+
+## Problem 1
+
+### Import data
+```{r}
+homicides_data = 
+  read_csv("data/homicide-data.csv") |>
+  janitor::clean_names()
+```
+
+### Describe the raw data 
+
+* The data set contains `r nrow(homicides_data)` observations of `r ncol(homicides_data)` variables, which shows the details of homicides in 50 large U.S. cities.
+* The data set includes the reported date of homicides, the victims' personal information, the location and disposition of the homicides. 
+
+```{r}
+# create a city_state variable
+homicides_data =
+  homicides_data |>
+  mutate(city_state = paste0(city,', ',state))
+
+# summarize within cities to obtain the total number of homicides and the number of unsolved homicides 
+homicides_data |>
+  group_by(city_state) |>
+  summarise(
+    total_homicides = n(),
+    unsolved_homicides = sum(disposition %in% c("Closed without arrest","Open/No arrest"))
+    ) |>
+  knitr::kable()
+```
+
+
+
+
+
+
+
+
 
