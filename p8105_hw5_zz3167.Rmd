@@ -184,4 +184,43 @@ longitudinal_df |>
 
 * Comment: 
 
+## Problem 3
+
+First set the following design elements:
+* Fix n=30
+* Fix σ=5
+
+Set μ=0. Generate 5000 datasets from the model: x∼Normal[μ,σ]
+
+For each dataset, save μ^ and the p-value arising from a test of H:μ=0 using α=0.05.
+
+### For mu = 0
+
+```{r}
+sim_test = function(mu){
+  
+  sim_data = rnorm(n = 30, mean = mu, sd = 5)
+  
+  sim_result = 
+    t.test(sim_data) |>
+    broom::tidy()|>
+    select(estimate, p.value)
+  
+  return(sim_result)
+}
+
+mu_0_result = 
+  expand_grid(
+    mu = 0,
+    iter = 1:5000
+  ) |>
+  mutate(result = map(mu, sim_test)) |>
+  unnest(result)
+
+mu_0_result
+```
+
+
+
+
 
