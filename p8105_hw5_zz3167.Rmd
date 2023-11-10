@@ -10,9 +10,8 @@ library(tidyverse)
 library(broom)
 
 knitr::opts_chunk$set(
-  fig.width = 15,
+  fig.width = 12,
   fig.asp = .6,
-  dpi = 200,
   out.width = "90%",
   message = FALSE, 
   warning = FALSE
@@ -169,12 +168,20 @@ longitudinal_df =
   select(arm, subject_id, week, observation)
 
 longitudinal_df
-
 ```
 
+### Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups
 
+```{r}
+longitudinal_df |>
+  ggplot(aes(x = week, y = observation, group = subject_id, color = subject_id)) +
+  geom_line() +
+  facet_grid(.~arm) +
+  labs(x = "week",
+       y = "observation",
+       title = "Observation for Each Subject over Time")
+```
 
-
-
+* Comment: 
 
 
