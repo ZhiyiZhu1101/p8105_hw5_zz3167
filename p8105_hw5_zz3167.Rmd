@@ -116,4 +116,27 @@ total_result =
 total_result
 ```
 
+### Create a plot that shows the estimates and CIs for each city
+
+```{r}
+total_result |>
+  arrange(estimate) |>
+  ggplot(aes(x = city_name, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 45, size = 6))+
+  labs(x = "City", 
+       y = "Estimate and 95% CI", 
+       title = "Estimates and Confidence Intervals for Unsolved Homicides by City")
+```
+
+
+
+
+
+
+
+
+
+
 
