@@ -130,9 +130,47 @@ total_result |>
        title = "Estimates and Confidence Intervals for Unsolved Homicides by City")
 ```
 
+## Problem 2
 
+Create a tidy dataframe containing data from all participants, including the subject ID, arm, and observations over time:
 
+* Start with a dataframe containing all file names; the list.files function will help
+* Iterate over file names and read in data for each subject using purrr::map and saving the result as a new variable in the dataframe
+* Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 
+```{r}
+# File names
+file_name = 
+  list.files(path = "data/longitudinal/")
+
+# Iterate over file names and read in data
+longitudinal_df = 
+  data_frame(file_name) |>
+  mutate(
+    file_path = str_c("data/longitudinal/", file_name),
+    data = map(file_path, read_csv)) |>
+  unnest(data) 
+
+# Tidy the result
+longitudinal_df = 
+  longitudinal_df|>
+  janitor::clean_names() |>
+  separate(file_name, into = c("arm", "subject_id"), sep = "_") |>
+  mutate(
+    arm = case_match(
+      arm, 
+      "con" ~ "control", 
+      "exp" ~ "experiment")) |>
+  mutate(subject_id = str_replace(subject_id, ".csv", "")) |>
+  pivot_longer(week_1:week_8, 
+               names_to = "week",
+               names_prefix = "week_",
+               values_to = "observation") |>
+  select(arm, subject_id, week, observation)
+
+longitudinal_df
+
+```
 
 
 
