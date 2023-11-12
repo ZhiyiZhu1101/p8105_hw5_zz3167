@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
   warning = FALSE
 )
 
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
+theme_set(theme_bw() + theme(legend.position = "bottom"))
 
 ```
 
@@ -220,7 +220,78 @@ mu_0_result =
 mu_0_result
 ```
 
+### For mu = 1,2,3,4,5,6 
 
+Repeat the above for μ={1,2,3,4,5,6}, and complete the following:
 
+* Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
+* Make a plot showing the average estimate of μ^ on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ^ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ^ across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+
+```{r}
+total_sim_result = 
+  expand.grid(mu = 1:6,iter = 1:5000) |>
+  mutate(result = map(mu, sim_test)) |>
+  unnest(result) |>
+  bind_rows(mu_0_result)
+```
+
+### Make a plot showing the proportion of times the null was rejected
+
+```{r}
+total_sim_result |>
+  group_by(mu) |>
+  summarise(
+    total = n(),
+    reject_num = sum(p.value < 0.05)
+  ) |>
+  mutate(rejected_proportion = reject_num / total) |>
+  ggplot(aes(x = mu, y = rejected_proportion)) +
+  scale_x_continuous(limits = c(0,6), breaks = seq(0,6,1)) + 
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  labs(x = "True Mean", y = "Power", title = "Power of the test with Different True Means")
+```
+
+### Make a plot showing the average estimate of different true mean
+
+```{r}
+total_sim_result |>
+  group_by(mu) |>
+  summarise(mean_estimate = mean(estimate)) |>
+  ggplot(aes(x = mu, y = mean_estimate)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(limits = c(0,6), breaks = seq(0,6,1)) +
+  labs(x = "True mean",
+       y = "Average of Estimated Mean",
+       title = "Estimated Mean vs True Mean")
+```
+
+### Make a second plot the average estimate of μ^ only in samples for which the null was rejected on the y axis and the true value of μ on the x axis
+
+```{r}
+rejected_df = 
+  total_sim_result |>
+  filter(p.value < 0.05) |>
+  group_by(mu) |>
+  summarize(mean_estimate = mean(estimate))
+
+total_df = 
+  total_sim_result |>
+  group_by(mu) |>
+  summarize(mean_estimate = mean(estimate))
+
+ggplot()+
+  geom_point(data = total_df, aes(x = mu, y = mean_estimate, color = "All Estimate"))+
+  geom_line(data = total_df, aes(x = mu, y = mean_estimate, color = "All Estimate"))+
+  geom_point(data = rejected_df, aes(x = mu, y = mean_estimate, color = "Rejected Estimate")) +
+  geom_line(data = rejected_df, aes(x = mu, y = mean_estimate, color = "Rejected Estimate"))+
+  scale_x_continuous(limits = c(0,6), breaks = seq(0,6,1)) +
+  scale_color_manual(values = c("Rejected Estimate" = "blue", "All Estimate" = "red")) +
+  labs(x = "True mean",
+       y = "Average of Estimated Mean",
+       title = "All versus Rejected Estimates")
+```
 
 
