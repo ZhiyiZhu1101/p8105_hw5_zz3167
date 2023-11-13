@@ -33,7 +33,9 @@ homicides_data =
 ### Describe the raw data 
 
 * The data set contains `r nrow(homicides_data)` observations of `r ncol(homicides_data)` variables, which shows the details of homicides in 50 large U.S. cities.
-* The data set includes the reported date of homicides, the victims' personal information, the location and disposition of the homicides. 
+* Each row represents a homicide record (identified by a `uid`), with information about the location of the killing (`city`, `state`, `lat` and `lon`), whether an arrest was made (`disposition`), and basic individual information about the victim (last and first name, race, age and sex).
+
+
 
 ```{r}
 # create a city_state variable
@@ -119,13 +121,12 @@ total_result
 
 ```{r}
 total_result |>
-  arrange(estimate) |>
-  ggplot(aes(x = city_name, y = estimate)) +
+  mutate(city_name = reorder(city_name, estimate)) |>
+  ggplot(aes(x = estimate, y = city_name)) +
   geom_point() +
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
-  theme(axis.text.x = element_text(angle = 45, size = 6))+
-  labs(x = "City", 
-       y = "Estimate and 95% CI", 
+  geom_errorbar(aes(xmin = conf.low, xmax = conf.high)) +
+  labs(x = "Estimate and 95% CI", 
+       y = "City", 
        title = "Estimates and Confidence Intervals for Unsolved Homicides by City")
 ```
 
@@ -175,6 +176,7 @@ longitudinal_df
 ```{r}
 longitudinal_df |>
   ggplot(aes(x = week, y = observation, group = subject_id, color = subject_id)) +
+  geom_point()+
   geom_line() +
   facet_grid(.~arm) +
   labs(x = "week",
@@ -183,6 +185,8 @@ longitudinal_df |>
 ```
 
 * Comment: 
+  * As can be seen from the plot, the experimental arm consistently shows a significantly higher value compared to the control arm .
+  * Moreover, the observations for the control group fluctuates around a fixed value, whereas the observations for the experimental group generally shows a tendency to increase over time.
 
 ## Problem 3
 
@@ -253,6 +257,9 @@ total_sim_result |>
   labs(x = "True Mean", y = "Power", title = "Power of the test with Different True Means")
 ```
 
+* Comment: 
+  * Association between effect size and power: The plot illustrates that as the true mean increases, power also increases. In other words, the power rises with the effect size, ultimately approaching 1.
+
 ### Make a plot showing the average estimate of different true mean
 
 ```{r}
@@ -294,4 +301,6 @@ ggplot()+
        title = "All versus Rejected Estimates")
 ```
 
-
+* Comment:
+  * When the true mean is smaller than 4, the sample average estimate means for which the null is rejected are different from the true mean. This might because the effect size is small so the power is relatively low.
+  * When the true mean is larger or equal to 4 , the sample average estimate means for which the null is rejected are similar to the true mean. This might because the power increases as the effect size increases.
